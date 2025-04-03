@@ -2,25 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:threaders/widgets/custom_textfield.dart';
 import 'package:threaders/widgets/custom_button.dart';
 
-class LoginScreen extends StatefulWidget {
+class RegistrationScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _RegistrationScreenState createState() => _RegistrationScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _rememberMe = false; // Track checkbox state
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  bool _agreeToTerms = false;
 
-  void _login() {
+  void _register() {
     if (_formKey.currentState!.validate()) {
-      // Show success message
+      if (!_agreeToTerms) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("You must agree to the Terms & Services"),
+          ),
+        );
+        return;
+      }
 
-      // Navigate to Home screen after successful login
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.pushReplacementNamed(context, '/home');
-      });
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
 
@@ -43,10 +50,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Welcome Message
                 const Text(
-                  "Welcome Back!",
+                  "Create an Account",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 30),
+
+                // Username Input
+                CustomTextField(
+                  hintText: "Username",
+                  icon: Icons.person,
+                  controller: _usernameController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please enter a username";
+                    }
+                    if (value.length < 3) {
+                      return "Username must be at least 3 characters";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 15),
 
                 // Email Input
                 CustomTextField(
@@ -83,90 +107,65 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 15),
 
-                // Remember Me & Forgot Password Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Remember Me Checkbox
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _rememberMe,
-                          onChanged: (value) {
-                            setState(() {
-                              _rememberMe = value!;
-                            });
-                          },
-                        ),
-                        const Text("Remember Me"),
-                      ],
-                    ),
-
-                    // Forgot Password Button
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text("Forgot Password?"),
-                    ),
-                  ],
+                // Confirm Password Input
+                CustomTextField(
+                  hintText: "Confirm Password",
+                  icon: Icons.lock,
+                  isPassword: true,
+                  controller: _confirmPasswordController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please confirm your password";
+                    }
+                    if (value != _passwordController.text) {
+                      return "Passwords do not match";
+                    }
+                    return null;
+                  },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
 
-                // Login Button
-                CustomButton(
-                  text: "Login",
-                  color: Colors.indigo[900]!,
-                  onPressed: _login,
-                ),
-                const SizedBox(height: 20),
-
-                // OR Divider
+                // Terms & Services Checkbox
                 Row(
                   children: [
-                    Expanded(child: Divider()),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Text("or sign in with"),
+                    Checkbox(
+                      value: _agreeToTerms,
+                      onChanged: (value) {
+                        setState(() {
+                          _agreeToTerms = value!;
+                        });
+                      },
                     ),
-                    Expanded(child: Divider()),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Google Sign-In Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(15),
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Colors.grey),
+                    const Expanded(
+                      child: Text(
+                        "I agree to the Terms & Services",
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    icon: Image.asset("assets/images/google.png", height: 24),
-                    label: const Text(
-                      "Google",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    onPressed: () {},
-                  ),
+                  ],
                 ),
-
                 const SizedBox(height: 20),
 
-                // Signup Text
+                // Register Button
+                CustomButton(
+                  text: "Register",
+                  color: Colors.indigo[900]!,
+                  onPressed: _register,
+                ),
+                const SizedBox(height: 20),
+
+                // Already have an account?
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Don't have an account?"),
+                    const Text("Already have an account?"),
                     TextButton(
                       onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/register');
+                        Navigator.pushReplacementNamed(context, '/login');
                       },
-                      child: const Text("Create here"),
+                      child: const Text("Login here"),
                     ),
                   ],
                 ),
